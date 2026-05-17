@@ -1,0 +1,62 @@
+# Environment files
+.env
+
+# Windows System / User Profile folders
+AppData/
+IntelGraphicsProfiles/
+Searches/
+Contacts/
+Links/
+Music/
+Pictures/
+Videos/
+Saved Games/
+Favorites/
+OneDrive/
+Downloads/
+.vscode/
+.vscode-shared/
+.matplotlib/
+.ms-ad/
+NTUSER.DAT*
+ntuser.dat*
+ntuser.ini
+.gemini/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Go
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bank_project/bank_dnn.exe
+
+# Model weights and temporary data
+weights.json
+weights_go.json
+rbm_test/weight/
+rbm_test/image/binarized_*
+output.txt
+
+# Gemini CLI / IDE
+.gemini/
+.vscode/
+.matplotlib/
+GEMINI.md
+MEMORY.md
