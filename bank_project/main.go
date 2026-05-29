@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"math"
 	"math/rand"
 	"os"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -260,7 +263,7 @@ func (nn *DNN) Train(inputArray, targetArray []float64) float64 {
 
 	// For Softmax + Cross-Entropy, error is (output - target)
 	errors := activations[len(activations)-1].Subtract(targets)
-	
+
 	dLoss := errors // Gradient for the last layer
 
 	for i := len(nn.Weights) - 1; i >= 0; i-- {
@@ -297,93 +300,195 @@ type BankData struct {
 	Numbers []float64
 }
 
+type Prediction struct {
+	Bank       string
+	Confidence float64
+	Scores     []float64
+}
+
 func normalize(nums []float64) []float64 {
 	res := make([]float64, 3)
 	res[0] = nums[0] / 1000.0
 	res[1] = nums[1] / 10000000.0
-	res[2] = nums[2] / 1000.0
+	res[2] = nums[2] / 10000000.0
 	return res
 }
 
-func main() {
-	rand.Seed(time.Now().UnixNano())
-
-	bankNames := []string{"mizuho", "saitamarisona", "mitsuisumitomo", "sonybank"}
+func makeNameIndex(bankNames []string) map[string]int {
 	nameToID := make(map[string]int)
 	for i, name := range bankNames {
 		nameToID[name] = i
 	}
+	return nameToID
+}
 
-	// Repaired and fixed data (matching JS version)
-	rawData := []BankData{
+func defaultTrainingData() []BankData {
+	return []BankData{
 		{Name: "mizuho", Numbers: []float64{560, 2278648, 0}},
 		{Name: "saitamarisona", Numbers: []float64{793, 0, 4366399}},
 		{Name: "mitsuisumitomo", Numbers: []float64{200, 4902647, 0}},
 		{Name: "sonybank", Numbers: []float64{1, 6774308, 0}},
 	}
+}
 
-	// Deep Neural Network architecture: 3 inputs, 16 hidden, 16 hidden, 4 outputs
-	nn := NewDNN([]int{3, 16, 16, 4}, 0.001)
-
-	fmt.Println("Training Deep Neural Network (DNN) on Bank Data...")
-	fmt.Println("Using goroutines for parallel Matrix multiplication.")
-
-	epochs := 20000
+func trainModel(nn *DNN, rawData []BankData, bankNames []string, epochs int, r *rand.Rand) bool {
+	nameToID := makeNameIndex(bankNames)
 	for e := 0; e < epochs; e++ {
 		epochLoss := 0.0
-		// Shuffle data for better training
-		rand.Shuffle(len(rawData), func(i, j int) {
+		r.Shuffle(len(rawData), func(i, j int) {
 			rawData[i], rawData[j] = rawData[j], rawData[i]
 		})
 
 		for _, data := range rawData {
-			target := make([]float64, 4)
+			target := make([]float64, len(bankNames))
 			target[nameToID[data.Name]] = 1.0
 			loss := nn.Train(normalize(data.Numbers), target)
 			if math.IsNaN(loss) {
 				fmt.Printf("\nNaN detected at epoch %d. Aborting training.\n", e)
-				return
+				return false
 			}
 			epochLoss += loss
 		}
 		if e%(epochs/10) == 0 {
-			fmt.Printf("Epoch %d/%d completed, Loss: %.6f\n", e, epochs, epochLoss/float64(len(rawData)))
+			fmt.Printf("Epoch %5d/%d | Loss: %.8f\n", e, epochs, epochLoss/float64(len(rawData)))
 		}
 	}
+	return true
+}
 
-	fmt.Println("\nTraining Complete. Testing Predictions:")
+func predictBank(nn *DNN, bankNames []string, numbers []float64) Prediction {
+	scores := nn.FeedForward(normalize(numbers))
+	maxIdx := 0
+	maxVal := -1.0
+	for i, val := range scores {
+		if val > maxVal {
+			maxVal = val
+			maxIdx = i
+		}
+	}
+	return Prediction{Bank: bankNames[maxIdx], Confidence: maxVal, Scores: scores}
+}
 
-	for _, data := range rawData {
-		prediction := nn.FeedForward(normalize(data.Numbers))
-		maxIdx := 0
-		maxVal := -1.0
-		for i, val := range prediction {
-			if val > maxVal {
-				maxVal = val
-				maxIdx = i
+func parseNumbers(args []string) ([]float64, error) {
+	if len(args) != 3 {
+		return nil, fmt.Errorf("expected 3 numeric values: branch account1 account2")
+	}
+	nums := make([]float64, 3)
+	for i, raw := range args {
+		value, err := strconv.ParseFloat(raw, 64)
+		if err != nil {
+			return nil, fmt.Errorf("invalid number %q", raw)
+		}
+		nums[i] = value
+	}
+	return nums, nil
+}
+
+func printHelp() {
+	fmt.Println("Commands:")
+	fmt.Println("  predict <branch> <account1> <account2>  Run DNN prediction")
+	fmt.Println("  learn <bank> <branch> <account1> <account2>  Add sample and retrain")
+	fmt.Println("  banks                                   List known bank labels")
+	fmt.Println("  save                                    Save weights_go.json")
+	fmt.Println("  help                                    Show commands")
+	fmt.Println("  exit                                    Quit")
+}
+
+func runChat(nn *DNN, rawData []BankData, bankNames []string, r *rand.Rand) {
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Println("\nConversational AI DNN CLI is ready. Type help for commands.")
+	for {
+		fmt.Print("ai-dnn> ")
+		if !scanner.Scan() {
+			fmt.Println()
+			return
+		}
+
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		fields := strings.Fields(line)
+		cmd := strings.ToLower(fields[0])
+
+		switch cmd {
+		case "exit", "quit":
+			fmt.Println("bye")
+			return
+		case "help":
+			printHelp()
+		case "banks":
+			fmt.Println(strings.Join(bankNames, ", "))
+		case "predict":
+			nums, err := parseNumbers(fields[1:])
+			if err != nil {
+				fmt.Println("error:", err)
+				continue
 			}
+			prediction := predictBank(nn, bankNames, nums)
+			fmt.Printf("Predicted: %s (confidence %.2f%%)\n", prediction.Bank, prediction.Confidence*100)
+			fmt.Printf("Scores: %v\n", prediction.Scores)
+		case "learn":
+			if len(fields) != 5 {
+				fmt.Println("error: expected learn <bank> <branch> <account1> <account2>")
+				continue
+			}
+			bank := strings.ToLower(fields[1])
+			if _, ok := makeNameIndex(bankNames)[bank]; !ok {
+				fmt.Println("error: unknown bank. Use banks to list labels.")
+				continue
+			}
+			nums, err := parseNumbers(fields[2:])
+			if err != nil {
+				fmt.Println("error:", err)
+				continue
+			}
+			rawData = append(rawData, BankData{Name: bank, Numbers: nums})
+			fmt.Println("Learning from new sample...")
+			trainModel(nn, rawData, bankNames, 2000, r)
+			fmt.Println("Learning complete.")
+		case "save":
+			if err := nn.Save("weights_go.json"); err != nil {
+				fmt.Printf("Error saving weights: %v\n", err)
+			} else {
+				fmt.Println("Weights saved to weights_go.json.")
+			}
+		default:
+			fmt.Println("unknown command. Type help for commands.")
 		}
-		fmt.Printf("Input: %s %v -> Predicted: %s (Confidence: %.2f%%)\n", 
-			data.Name, data.Numbers, bankNames[maxIdx], maxVal*100)
+	}
+}
+
+func main() {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	bankNames := []string{"mizuho", "saitamarisona", "mitsuisumitomo", "sonybank"}
+	rawData := defaultTrainingData()
+
+	nn := NewDNN([]int{3, 16, 16, 4}, 0.01)
+
+	fmt.Println("=== Conversational Bank Prediction DNN (Go) ===")
+	fmt.Println("Concurrency: goroutines are used for matrix dot products")
+	fmt.Println("Architecture: 3 inputs -> 16 -> 16 -> 4 outputs")
+	fmt.Println("Training...")
+
+	if !trainModel(nn, rawData, bankNames, 10000, r) {
+		return
 	}
 
-	fmt.Println("\nSaving trained weights to weights_go.json...")
-	if err := nn.Save("weights_go.json"); err != nil {
-		fmt.Printf("Failed to save weights: %v\n", err)
-	} else {
-		fmt.Println("Weights saved successfully.")
-	}
+	fmt.Println("\nTraining Complete. Verification:")
 
-	// Demonstrate Goroutines explicitly for a batch prediction
-	fmt.Println("\nRunning Parallel Batch Prediction with Goroutines...")
-	var wg sync.WaitGroup
 	for _, data := range rawData {
-		wg.Add(1)
-		go func(d BankData) {
-			defer wg.Done()
-			pred := nn.FeedForward(normalize(d.Numbers))
-			fmt.Printf("Goroutine prediction for %-15s: %v\n", d.Name, pred)
-		}(data)
+		prediction := predictBank(nn, bankNames, data.Numbers)
+		fmt.Printf("Input: %-15s %v -> Predicted: %-15s (Confidence: %6.2f%%)\n",
+			data.Name, data.Numbers, prediction.Bank, prediction.Confidence*100)
 	}
-	wg.Wait()
+
+	fmt.Println("\nSaving weights to weights_go.json...")
+	if err := nn.Save("weights_go.json"); err != nil {
+		fmt.Printf("Error saving weights: %v\n", err)
+	} else {
+		fmt.Println("Weights saved.")
+	}
+
+	runChat(nn, rawData, bankNames, r)
 }

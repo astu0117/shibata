@@ -10,11 +10,20 @@
   "main": "index.js",
   "devDependencies": {},
   "scripts": {
+    "build": "node --check index.js && node --check dnn.js",
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test test/*.test.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/astu0117/shibata.git"
+  },
+  "bugs": {
+    "url": "https://github.com/astu0117/shibata/issues"
+  },
+  "homepage": "https://github.com/astu0117/shibata#readme"
 }

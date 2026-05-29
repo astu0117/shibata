@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -23,18 +24,19 @@ func NewMatrix(rows, cols int) *Matrix {
 	return &Matrix{Rows: rows, Cols: cols, Data: data}
 }
 
-// RandomMatrix creates a new matrix with random values
+// RandomMatrix creates a new matrix with He initialization
 func RandomMatrix(rows, cols int) *Matrix {
 	m := NewMatrix(rows, cols)
+	std := math.Sqrt(2.0 / float64(cols))
 	for i := 0; i < rows; i++ {
 		for j := 0; j < cols; j++ {
-			m.Data[i][j] = rand.Float64()*2 - 1
+			m.Data[i][j] = (rand.Float64()*2 - 1) * std
 		}
 	}
 	return m
 }
 
-// Dot computes the dot product of two matrices using goroutines for parallelism
+// Dot computes the dot product of two matrices using goroutines
 func (m *Matrix) Dot(n *Matrix) *Matrix {
 	if m.Cols != n.Rows {
 		panic(fmt.Sprintf("invalid dimensions for dot product: %dx%d and %dx%d", m.Rows, m.Cols, n.Rows, n.Cols))
@@ -42,29 +44,38 @@ func (m *Matrix) Dot(n *Matrix) *Matrix {
 	res := NewMatrix(m.Rows, n.Cols)
 	var wg sync.WaitGroup
 
-	// Use goroutines to calculate each row of the result matrix in parallel
-	for i := 0; i < m.Rows; i++ {
+	numWorkers := runtime.NumCPU()
+	rowsPerWorker := (m.Rows + numWorkers - 1) / numWorkers
+
+	for w := 0; w < numWorkers; w++ {
+		startRow := w * rowsPerWorker
+		endRow := (w + 1) * rowsPerWorker
+		if startRow >= m.Rows {
+			break
+		}
+		if endRow > m.Rows {
+			endRow = m.Rows
+		}
+
 		wg.Add(1)
-		go func(row int) {
+		go func(s, e int) {
 			defer wg.Done()
-			for j := 0; j < n.Cols; j++ {
-				sum := 0.0
-				for k := 0; k < m.Cols; k++ {
-					sum += m.Data[row][k] * n.Data[k][j]
+			for i := s; i < e; i++ {
+				for j := 0; j < n.Cols; j++ {
+					sum := 0.0
+					for k := 0; k < m.Cols; k++ {
+						sum += m.Data[i][k] * n.Data[k][j]
+					}
+					res.Data[i][j] = sum
 				}
-				res.Data[row][j] = sum
 			}
-		}(i)
+		}(startRow, endRow)
 	}
 	wg.Wait()
 	return res
 }
 
-// Add adds two matrices
 func (m *Matrix) Add(n *Matrix) *Matrix {
-	if m.Rows != n.Rows || m.Cols != n.Cols {
-		panic("invalid dimensions for addition")
-	}
 	res := NewMatrix(m.Rows, m.Cols)
 	for i := 0; i < m.Rows; i++ {
 		for j := 0; j < m.Cols; j++ {
@@ -74,7 +85,26 @@ func (m *Matrix) Add(n *Matrix) *Matrix {
 	return res
 }
 
-// Map applies a function to every element of the matrix
+func (m *Matrix) Subtract(n *Matrix) *Matrix {
+	res := NewMatrix(m.Rows, m.Cols)
+	for i := 0; i < m.Rows; i++ {
+		for j := 0; j < m.Cols; j++ {
+			res.Data[i][j] = m.Data[i][j] - n.Data[i][j]
+		}
+	}
+	return res
+}
+
+func (m *Matrix) Multiply(n *Matrix) *Matrix {
+	res := NewMatrix(m.Rows, m.Cols)
+	for i := 0; i < m.Rows; i++ {
+		for j := 0; j < m.Cols; j++ {
+			res.Data[i][j] = m.Data[i][j] * n.Data[i][j]
+		}
+	}
+	return res
+}
+
 func (m *Matrix) Map(f func(float64) float64) *Matrix {
 	res := NewMatrix(m.Rows, m.Cols)
 	for i := 0; i < m.Rows; i++ {
@@ -85,7 +115,6 @@ func (m *Matrix) Map(f func(float64) float64) *Matrix {
 	return res
 }
 
-// Transpose returns the transpose of the matrix
 func (m *Matrix) Transpose() *Matrix {
 	res := NewMatrix(m.Cols, m.Rows)
 	for i := 0; i < m.Rows; i++ {
@@ -97,58 +126,113 @@ func (m *Matrix) Transpose() *Matrix {
 }
 
 // Activation functions
-func sigmoid(x float64) float64 {
-	return 1 / (1 + math.Exp(-x))
-}
-
-func dsigmoid(y float64) float64 {
-	return y * (1 - y)
-}
-
-// DNN represents a simple Deep Neural Network
-type DNN struct {
-	weightsIH *Matrix
-	weightsHO *Matrix
-	biasH     *Matrix
-	biasO     *Matrix
-	lr        float64
-}
-
-// NewDNN initializes a new DNN
-func NewDNN(input, hidden, output int, lr float64) *DNN {
-	return &DNN{
-		weightsIH: RandomMatrix(hidden, input),
-		weightsHO: RandomMatrix(output, hidden),
-		biasH:     RandomMatrix(hidden, 1),
-		biasO:     RandomMatrix(output, 1),
-		lr:        lr,
+func relu(x float64) float64 {
+	if x > 0 {
+		return x
 	}
+	return 0
 }
 
-// FeedForward performs the forward pass
-func (nn *DNN) FeedForward(inputData []float64) []float64 {
-	inputs := NewMatrix(len(inputData), 1)
-	for i, v := range inputData {
-		inputs.Data[i][0] = v
+func drelu(x float64) float64 {
+	if x > 0 {
+		return 1
 	}
+	return 0
+}
 
-	// Hidden layer
-	hidden := nn.weightsIH.Dot(inputs).Add(nn.biasH).Map(sigmoid)
-	// Output layer
-	outputs := nn.weightsHO.Dot(hidden).Add(nn.biasO).Map(sigmoid)
-
-	res := make([]float64, outputs.Rows)
-	for i := 0; i < outputs.Rows; i++ {
-		res[i] = outputs.Data[i][0]
+func softmax(inputs *Matrix) *Matrix {
+	res := NewMatrix(inputs.Rows, inputs.Cols)
+	for j := 0; j < inputs.Cols; j++ {
+		maxVal := -math.MaxFloat64
+		for i := 0; i < inputs.Rows; i++ {
+			if inputs.Data[i][j] > maxVal {
+				maxVal = inputs.Data[i][j]
+			}
+		}
+		sum := 0.0
+		for i := 0; i < inputs.Rows; i++ {
+			val := math.Exp(inputs.Data[i][j] - maxVal)
+			if math.IsInf(val, 0) || math.IsNaN(val) {
+				val = 1e-10
+			}
+			res.Data[i][j] = val
+			sum += val
+		}
+		if sum == 0 {
+			sum = 1e-10
+		}
+		for i := 0; i < inputs.Rows; i++ {
+			res.Data[i][j] /= sum
+		}
 	}
 	return res
 }
 
-// Train performs one iteration of backpropagation
-func (nn *DNN) Train(inputData, targetData []float64) {
-	inputs := NewMatrix(len(inputData), 1)
+// DNN Architecture
+type DNN struct {
+	weights []*Matrix
+	biases  []*Matrix
+	lr      float64
+	mu      sync.Mutex
+}
+
+func NewDNN(layers []int, lr float64) *DNN {
+	nn := &DNN{
+		weights: make([]*Matrix, len(layers)-1),
+		biases:  make([]*Matrix, len(layers)-1),
+		lr:      lr,
+	}
+	for i := 0; i < len(layers)-1; i++ {
+		nn.weights[i] = RandomMatrix(layers[i+1], layers[i])
+		nn.biases[i] = NewMatrix(layers[i+1], 1)
+	}
+	return nn
+}
+
+func (nn *DNN) FeedForward(inputData []float64) []float64 {
+	current := NewMatrix(len(inputData), 1)
 	for i, v := range inputData {
-		inputs.Data[i][0] = v
+		current.Data[i][0] = v
+	}
+
+	for i := 0; i < len(nn.weights); i++ {
+		current = nn.weights[i].Dot(current).Add(nn.biases[i])
+		if i == len(nn.weights)-1 {
+			current = softmax(current)
+		} else {
+			current = current.Map(relu)
+		}
+	}
+
+	res := make([]float64, current.Rows)
+	for i := 0; i < current.Rows; i++ {
+		res[i] = current.Data[i][0]
+	}
+	return res
+}
+
+func (nn *DNN) Train(inputData, targetData []float64) {
+	nn.mu.Lock()
+	defer nn.mu.Unlock()
+
+	current := NewMatrix(len(inputData), 1)
+	for i, v := range inputData {
+		current.Data[i][0] = v
+	}
+
+	activations := []*Matrix{current}
+	layerInputs := []*Matrix{}
+
+	// Forward pass
+	for i := 0; i < len(nn.weights); i++ {
+		z := nn.weights[i].Dot(current).Add(nn.biases[i])
+		layerInputs = append(layerInputs, z)
+		if i == len(nn.weights)-1 {
+			current = softmax(z)
+		} else {
+			current = z.Map(relu)
+		}
+		activations = append(activations, current)
 	}
 
 	targets := NewMatrix(len(targetData), 1)
@@ -156,115 +240,92 @@ func (nn *DNN) Train(inputData, targetData []float64) {
 		targets.Data[i][0] = v
 	}
 
-	// Feedforward
-	hidden := nn.weightsIH.Dot(inputs).Add(nn.biasH).Map(sigmoid)
-	outputs := nn.weightsHO.Dot(hidden).Add(nn.biasO).Map(sigmoid)
+	// Backpropagation
+	dLoss := activations[len(activations)-1].Subtract(targets)
 
-	// Output error = targets - outputs
-	outputErrors := NewMatrix(targets.Rows, 1)
-	for i := 0; i < targets.Rows; i++ {
-		outputErrors.Data[i][0] = targets.Data[i][0] - outputs.Data[i][0]
+	for i := len(nn.weights) - 1; i >= 0; i-- {
+		var gradients *Matrix
+		if i == len(nn.weights)-1 {
+			gradients = dLoss
+		} else {
+			gradients = layerInputs[i].Map(drelu).Multiply(dLoss)
+		}
+
+		weightDeltas := gradients.Dot(activations[i].Transpose())
+		
+		// Update weights and biases
+		for r := 0; r < nn.weights[i].Rows; r++ {
+			for c := 0; c < nn.weights[i].Cols; c++ {
+				nn.weights[i].Data[r][c] -= weightDeltas.Data[r][c] * nn.lr
+			}
+			nn.biases[i].Data[r][0] -= gradients.Data[r][0] * nn.lr
+		}
+
+		if i > 0 {
+			dLoss = nn.weights[i].Transpose().Dot(gradients)
+		}
 	}
+}
 
-	// Calculate output gradient
-	gradients := outputs.Map(dsigmoid)
-	for i := 0; i < gradients.Rows; i++ {
-		gradients.Data[i][0] *= outputErrors.Data[i][0] * nn.lr
+// Data normalization
+func normalize(nums []float64) []float64 {
+	return []float64{
+		nums[0] / 1000.0,
+		nums[1] / 10000000.0,
+		nums[2] / 10000000.0,
 	}
-
-	// Hidden to Output deltas
-	hiddenT := hidden.Transpose()
-	weightsHODeltas := gradients.Dot(hiddenT)
-
-	// Adjust Weights and Biases
-	nn.weightsHO = nn.weightsHO.Add(weightsHODeltas)
-	nn.biasO = nn.biasO.Add(gradients)
-
-	// Calculate hidden layer error
-	weightsHOT := nn.weightsHO.Transpose()
-	hiddenErrors := weightsHOT.Dot(outputErrors)
-
-	// Calculate hidden gradient
-	hiddenGradients := hidden.Map(dsigmoid)
-	for i := 0; i < hiddenGradients.Rows; i++ {
-		hiddenGradients.Data[i][0] *= hiddenErrors.Data[i][0] * nn.lr
-	}
-
-	// Input to Hidden deltas
-	inputsT := inputs.Transpose()
-	weightsIHDeltas := hiddenGradients.Dot(inputsT)
-
-	// Adjust Weights and Biases
-	nn.weightsIH = nn.weightsIH.Add(weightsIHDeltas)
-	nn.biasH = nn.biasH.Add(hiddenGradients)
 }
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	// Create a DNN with 2 inputs (x, y), 16 hidden neurons, and 1 output
-	nn := NewDNN(2, 16, 1, 0.1)
+	bankNames := []string{"mizuho", "saitamarisona", "mitsuisumitomo", "sonybank"}
+	rawData := []struct {
+		name string
+		nums []float64
+	}{
+		{"mizuho", []float64{560, 2278648, 0}},
+		{"saitamarisona", []float64{793, 0, 4366399}},
+		{"mitsuisumitomo", []float64{200, 4902647, 0}},
+		{"sonybank", []float64{1, 6774308, 0}},
+	}
 
-	fmt.Println("DNN Pi Estimator (Monte Carlo based Deep Learning)")
-	fmt.Println("Converting plot.py logic to Go with goroutines...")
-	fmt.Println("Training DNN to recognize points inside the circle...")
+	nn := NewDNN([]int{3, 16, 16, 4}, 0.1)
 
-	iterations := 500000
+	fmt.Println("=== Ported Bank DNN (Go with Goroutines) ===")
+	fmt.Println("Training classification model...")
+
+	epochs := 100000
 	start := time.Now()
 
-	// Train the DNN
-	for i := 0; i < iterations; i++ {
-		x := rand.Float64()*2 - 1 // Normalized [-1, 1]
-		y := rand.Float64()*2 - 1 // Normalized [-1, 1]
-		target := 0.0
-		if x*x+y*y <= 1.0 {
-			target = 1.0
-		}
-		nn.Train([]float64{x, y}, []float64{target})
-
-		if i%(iterations/10) == 0 && i > 0 {
-			fmt.Printf("... %d%% trained\n", (i*100)/iterations)
-		}
-	}
-
-	duration := time.Since(start)
-	fmt.Printf("\nTraining complete in %v. Testing and estimating Pi...\n", duration)
-
-	// Estimation using goroutines
-	testCount := 100000
-	numGoroutines := 10
-	pointsPerGoroutine := testCount / numGoroutines
-	
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-	insideCount := 0
-
-	fmt.Printf("Using %d goroutines for parallel estimation...\n", numGoroutines)
-
-	for g := 0; g < numGoroutines; g++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			localInside := 0
-			for i := 0; i < pointsPerGoroutine; i++ {
-				x := rand.Float64()*2 - 1
-				y := rand.Float64()*2 - 1
-				output := nn.FeedForward([]float64{x, y})
-				// If the DNN predicts > 0.5, classify as "inside"
-				if output[0] >= 0.5 {
-					localInside++
-				}
+	// Sequential training is often better for very small datasets to avoid noise from parallelism
+	for e := 0; e < epochs; e++ {
+		data := rawData[rand.Intn(len(rawData))]
+		target := make([]float64, len(bankNames))
+		for i, name := range bankNames {
+			if name == data.name {
+				target[i] = 1.0
+				break
 			}
-			mu.Lock()
-			insideCount += localInside
-			mu.Unlock()
-		}()
+		}
+		nn.Train(normalize(data.nums), target)
+		
+		if e%(epochs/10) == 0 && e > 0 {
+			fmt.Printf("... %d%% trained\n", (e*100)/epochs)
+		}
 	}
-	wg.Wait()
+	fmt.Printf("Training complete in %v\n\n", time.Since(start))
 
-	pi := (float64(insideCount) / float64(testCount)) * 4
-	fmt.Printf("\n--- Results ---\n")
-	fmt.Printf("Estimated Pi = %.6f\n", pi)
-	fmt.Printf("Actual Pi    = %.6f\n", math.Pi)
-	fmt.Printf("Error        = %.6f\n", math.Abs(math.Pi-pi))
+	fmt.Println("Testing Predictions:")
+	for _, data := range rawData {
+		pred := nn.FeedForward(normalize(data.nums))
+		maxIdx := 0
+		for i, v := range pred {
+			if v > pred[maxIdx] {
+				maxIdx = i
+			}
+		}
+		fmt.Printf("Input: %v | Target: %-15s | Predicted: %-15s (Confidence: %.2f%%)\n", 
+			data.nums, data.name, bankNames[maxIdx], pred[maxIdx]*100)
+	}
 }
