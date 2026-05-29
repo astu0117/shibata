@@ -14,6 +14,11 @@ Saved Games/
 Favorites/
 OneDrive/
 Downloads/
+Documents/
+My Documents/
+My Music/
+My Pictures/
+My Videos/
 .vscode/
 .vscode-shared/
 .matplotlib/
@@ -22,6 +27,17 @@ NTUSER.DAT*
 ntuser.dat*
 ntuser.ini
 .gemini/
+.codex/
+.anaconda/
+.conda/
+.continuum/
+anaconda3/
+Application Data/
+Cookies/
+Local Settings/
+Recent/
+SendTo/
+.gitconfig
 
 # Node.js
 node_modules/
@@ -46,6 +62,7 @@ bin/
 *.so
 *.dylib
 bank_project/bank_dnn.exe
+go/pkg/
 
 # Model weights and temporary data
 weights.json
