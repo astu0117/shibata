@@ -1,0 +1,1064 @@
+/* ==========================================================================
+   NEON TETS - Main Style Sheet
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Theme Variables & Initialization
+   -------------------------------------------------------------------------- */
+:root {
+    /* Fonts */
+    --font-primary: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-arcade: 'Share Tech Mono', monospace;
+
+    /* Transition Speeds */
+    --transition-slow: 0.5s ease;
+    --transition-normal: 0.3s ease;
+    --transition-fast: 0.1s ease;
+}
+
+/* Neon Cyber Theme (Default) */
+.theme-neon {
+    --bg-color-1: #06050c;
+    --bg-color-2: #0f0a24;
+    --panel-bg: rgba(13, 10, 36, 0.55);
+    --panel-border: rgba(0, 240, 255, 0.2);
+    --panel-glow: rgba(0, 240, 255, 0.15);
+    
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-muted: rgba(255, 255, 255, 0.4);
+
+    --primary-color: #00f0ff;
+    --primary-glow: #00f0ff;
+    --secondary-color: #ff007f;
+    --secondary-glow: #ff007f;
+    --error-color: #ff3b30;
+    --error-glow: rgba(255, 59, 48, 0.8);
+
+    --board-bg: rgba(6, 5, 12, 0.9);
+    --board-grid: rgba(255, 255, 255, 0.04);
+    --board-border: #00f0ff;
+
+    --btn-primary-bg: linear-gradient(135deg, #00f0ff, #0072ff);
+    --btn-primary-text: #050409;
+    --btn-secondary-bg: rgba(255, 255, 255, 0.08);
+    --btn-secondary-text: #ffffff;
+    --btn-secondary-border: rgba(255, 255, 255, 0.2);
+
+    /* Tetromino colors (RGBA for glowing canvas render) */
+    --color-i: #00f0ff;
+    --color-o: #ffea00;
+    --color-t: #bd00ff;
+    --color-s: #00ff66;
+    --color-z: #ff0055;
+    --color-j: #0066ff;
+    --color-l: #ff9900;
+}
+
+/* Retro Gameboy Theme */
+.theme-gameboy {
+    --bg-color-1: #9bbc0f;
+    --bg-color-2: #8bac0f;
+    --panel-bg: #8bac0f;
+    --panel-border: #306230;
+    --panel-glow: transparent;
+
+    --text-primary: #0f380f;
+    --text-secondary: #306230;
+    --text-muted: #306230;
+
+    --primary-color: #0f380f;
+    --primary-glow: transparent;
+    --secondary-color: #306230;
+    --secondary-glow: transparent;
+    --error-color: #0f380f;
+    --error-glow: transparent;
+
+    --board-bg: #9bbc0f;
+    --board-grid: rgba(15, 56, 15, 0.15);
+    --board-border: #0f380f;
+
+    --btn-primary-bg: #0f380f;
+    --btn-primary-text: #9bbc0f;
+    --btn-secondary-bg: transparent;
+    --btn-secondary-text: #0f380f;
+    --btn-secondary-border: #0f380f;
+
+    --color-i: #0f380f;
+    --color-o: #0f380f;
+    --color-t: #0f380f;
+    --color-s: #0f380f;
+    --color-z: #0f380f;
+    --color-j: #0f380f;
+    --color-l: #0f380f;
+}
+
+/* Pastel Dream Theme */
+.theme-pastel {
+    --bg-color-1: #f8f6fc;
+    --bg-color-2: #eae7f4;
+    --panel-bg: rgba(255, 255, 255, 0.8);
+    --panel-border: rgba(147, 112, 219, 0.15);
+    --panel-glow: rgba(147, 112, 219, 0.05);
+
+    --text-primary: #4a3e56;
+    --text-secondary: #70627e;
+    --text-muted: #a095ad;
+
+    --primary-color: #9370db;
+    --primary-glow: rgba(147, 112, 219, 0.4);
+    --secondary-color: #ff9fb2;
+    --secondary-glow: rgba(255, 159, 178, 0.4);
+    --error-color: #f08080;
+    --error-glow: rgba(240, 128, 128, 0.4);
+
+    --board-bg: #ffffff;
+    --board-grid: rgba(147, 112, 219, 0.06);
+    --board-border: #ff9fb2;
+
+    --btn-primary-bg: linear-gradient(135deg, #ff9fb2, #ffb7b2);
+    --btn-primary-text: #ffffff;
+    --btn-secondary-bg: rgba(147, 112, 219, 0.06);
+    --btn-secondary-text: #9370db;
+    --btn-secondary-border: rgba(147, 112, 219, 0.2);
+
+    --color-i: #b3ecf6;
+    --color-o: #fdf5c4;
+    --color-t: #e4c4fc;
+    --color-s: #c4fcd3;
+    --color-z: #ffc4d0;
+    --color-j: #c4defc;
+    --color-l: #ffe4c4;
+}
+
+/* Dark Minimalist Theme */
+.theme-minimal {
+    --bg-color-1: #0f0f0f;
+    --bg-color-2: #161616;
+    --panel-bg: rgba(25, 25, 25, 0.6);
+    --panel-border: rgba(255, 255, 255, 0.1);
+    --panel-glow: transparent;
+
+    --text-primary: #ffffff;
+    --text-secondary: #888888;
+    --text-muted: #444444;
+
+    --primary-color: #ffffff;
+    --primary-glow: rgba(255, 255, 255, 0.2);
+    --secondary-color: #555555;
+    --secondary-glow: transparent;
+    --error-color: #ff3b30;
+    --error-glow: rgba(255, 59, 48, 0.3);
+
+    --board-bg: #000000;
+    --board-grid: rgba(255, 255, 255, 0.05);
+    --board-border: #ffffff;
+
+    --btn-primary-bg: #ffffff;
+    --btn-primary-text: #000000;
+    --btn-secondary-bg: #1a1a1a;
+    --btn-secondary-text: #ffffff;
+    --btn-secondary-border: rgba(255, 255, 255, 0.15);
+
+    --color-i: #e0e0e0;
+    --color-o: #cccccc;
+    --color-t: #b8b8b8;
+    --color-s: #a4a4a4;
+    --color-z: #909090;
+    --color-j: #7c7c7c;
+    --color-l: #686868;
+}
+
+/* --------------------------------------------------------------------------
+   2. Reset & Global Styles
+   -------------------------------------------------------------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent; /* Remove touch blue highlight */
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: var(--font-primary);
+    background-color: var(--bg-color-1);
+    color: var(--text-primary);
+}
+
+body {
+    background: linear-gradient(135deg, var(--bg-color-1) 0%, var(--bg-color-2) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transition: background var(--transition-slow);
+}
+
+/* Font helpers */
+.font-arcade {
+    font-family: var(--font-arcade);
+    letter-spacing: 0.1em;
+}
+
+/* --------------------------------------------------------------------------
+   3. Decorative Background Elements
+   -------------------------------------------------------------------------- */
+.bg-grid-decor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Glow Orbs (Only visible on neon theme) */
+.glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.25;
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-slow);
+}
+.theme-neon .glow-orb {
+    opacity: 0.25;
+}
+.theme-gameboy .glow-orb,
+.theme-pastel .glow-orb,
+.theme-minimal .glow-orb {
+    opacity: 0;
+}
+.orb-1 {
+    width: 400px;
+    height: 400px;
+    background: var(--primary-color);
+    top: -100px;
+    left: -100px;
+}
+.orb-2 {
+    width: 450px;
+    height: 450px;
+    background: var(--secondary-color);
+    bottom: -150px;
+    right: -150px;
+}
+
+/* --------------------------------------------------------------------------
+   4. Glassmorphism Panels
+   -------------------------------------------------------------------------- */
+.glass-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+                0 0 15px 0 var(--panel-glow);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all var(--transition-normal);
+}
+
+.glass-panel:hover {
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+                0 0 25px 0 var(--panel-glow);
+}
+
+/* Pulsing neon border style for start modal */
+.pulse-border {
+    animation: neon-pulse 3s infinite alternate;
+}
+@keyframes neon-pulse {
+    0% {
+        border-color: var(--panel-border);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), 0 0 10px 0 rgba(0, 240, 255, 0.1);
+    }
+    100% {
+        border-color: var(--secondary-color);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), 0 0 25px 0 rgba(255, 0, 127, 0.4);
+    }
+}
+
+.error-border {
+    border-color: var(--error-color) !important;
+    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.4), 0 0 25px var(--error-glow) !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. General Controls & Buttons
+   -------------------------------------------------------------------------- */
+button {
+    cursor: pointer;
+    font-family: var(--font-primary);
+    border: none;
+    outline: none;
+    user-select: none;
+}
+
+.icon-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--panel-border);
+    border-radius: 30px;
+    backdrop-filter: blur(5px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition-normal);
+}
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-glow);
+    transform: translateY(-2px);
+}
+
+.icon-btn:active {
+    transform: translateY(0);
+}
+
+.menu-btn {
+    padding: 14px 28px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border-radius: 30px;
+    text-transform: uppercase;
+    transition: all var(--transition-normal);
+}
+
+.primary-btn {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    box-shadow: 0 5px 15px rgba(0, 240, 255, 0.3);
+}
+
+.primary-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 240, 255, 0.5);
+}
+
+.secondary-btn {
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+    border: 1px solid var(--btn-secondary-border);
+}
+
+.secondary-btn:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: var(--text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   6. Core App Container Layout
+   -------------------------------------------------------------------------- */
+.app-container {
+    width: 100%;
+    max-width: 1100px;
+    height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+/* Header */
+.game-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 15px;
+}
+
+.logo {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.logo span {
+    color: var(--secondary-color);
+    text-shadow: 0 0 10px var(--secondary-glow);
+}
+
+/* --------------------------------------------------------------------------
+   7. Main Layout (Game Panel System)
+   -------------------------------------------------------------------------- */
+.game-layout {
+    width: 100%;
+    flex: 1;
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    max-height: calc(100vh - 160px); /* header + footer offset */
+}
+
+/* Side Panels */
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+    justify-content: flex-start;
+}
+
+.panel-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+    letter-spacing: 0.1em;
+}
+
+/* Hold Box */
+.hold-container {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.hold-box {
+    width: 100px;
+    height: 100px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Controls Guide Box */
+.controls-guide {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.guide-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+.guide-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.guide-list span {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--font-arcade);
+    font-size: 0.8rem;
+    color: var(--primary-color);
+}
+
+/* Tetris Game Board Panel */
+.board-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.board-wrapper {
+    background: var(--board-bg);
+    border: 3px solid var(--board-border);
+    border-radius: 12px;
+    box-shadow: 0 0 25px var(--panel-glow);
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 1 / 2;
+    max-height: 100%;
+}
+
+#game-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Next Queue Panel */
+.next-container {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.next-queue {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+.next-box {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.main-next {
+    width: 90px;
+    height: 90px;
+}
+.sub-next-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+.sub-next {
+    width: 60px;
+    height: 60px;
+}
+
+/* Stats Display Panel */
+.stats-container {
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.stat-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+.stat-value {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+/* Footer */
+.game-footer {
+    width: 100%;
+    text-align: center;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   8. Modals & Screens Overlays
+   -------------------------------------------------------------------------- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(4, 3, 8, 0.75);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-normal);
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 440px;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    text-shadow: 0 0 15px var(--primary-glow);
+}
+
+.modal-desc {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 25px;
+}
+
+/* Start Overlay Specifics */
+.large {
+    font-size: 3.5rem;
+    margin-bottom: 5px;
+}
+
+.high-scores-box {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.high-scores-box h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    letter-spacing: 0.15em;
+}
+.high-scores-box ol {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+.high-scores-box li {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+.high-scores-box li span:first-child {
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+/* Theme selector Modal Specifics */
+.theme-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 30px;
+}
+.theme-opt-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    padding: 15px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: all var(--transition-normal);
+}
+.theme-opt-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text-primary);
+}
+.theme-opt-btn.active {
+    background: rgba(0, 240, 255, 0.08);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+}
+.theme-preview {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+.neon-color {
+    background: linear-gradient(135deg, #00f0ff, #ff007f);
+}
+.gameboy-color {
+    background: #0f380f;
+}
+.pastel-color {
+    background: linear-gradient(135deg, #ff9fb2, #e4c4fc);
+}
+.minimal-color {
+    background: #ffffff;
+}
+
+/* Modal Actions Layout */
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    margin-top: 15px;
+}
+.modal-actions button {
+    flex: 1;
+}
+
+/* New High score Record Input */
+.new-record-box {
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 15px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+.record-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+}
+.input-row input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--panel-border);
+    padding: 10px 15px;
+    border-radius: 30px;
+    color: var(--text-primary);
+    font-family: var(--font-arcade);
+    font-size: 1.2rem;
+    text-align: center;
+    text-transform: uppercase;
+    outline: none;
+    letter-spacing: 0.1em;
+}
+.input-row input:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
+}
+
+.score-summary {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+.error-glow {
+    font-size: 2rem;
+    color: var(--error-color);
+    text-shadow: 0 0 10px var(--error-glow);
+}
+.hidden {
+    display: none !important;
+}
+
+/* Toast alert notification style */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    color: var(--text-primary);
+    padding: 12px 24px;
+    border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    z-index: 200;
+    font-size: 0.9rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.toast.active {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   9. Mobile Touch virtual Pad Styles
+   -------------------------------------------------------------------------- */
+.mobile-controls {
+    display: none;
+    width: 100%;
+    max-width: 480px;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    user-select: none;
+}
+
+.mobile-row {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 10px;
+}
+
+.mobile-layout-grid {
+    display: grid;
+    grid-template-columns: 1.8fr 1.2fr;
+    gap: 15px;
+}
+
+.ctrl-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-radius: 12px;
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.1s, transform 0.1s;
+    user-select: none;
+}
+
+.secondary-ctrl {
+    padding: 12px;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    border-color: var(--panel-border);
+}
+
+/* D-Pad (Left/Right/Soft Drop) */
+.dpad-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+.pad-btn {
+    height: 64px;
+    font-size: 1.4rem;
+}
+.pad-down {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--panel-border);
+}
+
+/* Action Buttons (Rotations) */
+.actions-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.action-btn {
+    height: 64px;
+    font-size: 1.4rem;
+    border-radius: 50%;
+}
+.btn-ccw {
+    background: rgba(255, 0, 127, 0.1);
+    border-color: rgba(255, 0, 127, 0.3);
+    color: var(--secondary-color);
+}
+.btn-cw {
+    background: rgba(0, 240, 255, 0.15);
+    border-color: rgba(0, 240, 255, 0.4);
+    color: var(--primary-color);
+}
+
+/* Click and active state animations */
+.ctrl-btn:active {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: scale(0.95);
+}
+
+.btn-ccw:active {
+    background: rgba(255, 0, 127, 0.35) !important;
+}
+
+.btn-cw:active {
+    background: rgba(0, 240, 255, 0.4) !important;
+}
+
+/* --------------------------------------------------------------------------
+   10. Screen shaking animation effect
+   -------------------------------------------------------------------------- */
+.shake {
+    animation: shake-anim 0.15s infinite;
+}
+@keyframes shake-anim {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(0px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(2px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(2px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+/* --------------------------------------------------------------------------
+   11. Media Queries for Responsiveness
+   -------------------------------------------------------------------------- */
+
+/* Responsive breakpoints */
+@media (max-width: 900px) {
+    /* Hide desktop panels, change layout to single column game, enable virtual controls */
+    .game-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        gap: 10px;
+        max-height: calc(100vh - 210px);
+    }
+    
+    .panel-left {
+        display: none; /* Hide hold and controls guide on desktop layout positions */
+    }
+
+    /* Reposition next and score panel inline above the main board */
+    .panel-right {
+        flex-direction: row;
+        width: 100%;
+        height: auto;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .panel-right > div {
+        flex: 1;
+        border-radius: 12px;
+        padding: 8px 12px;
+    }
+    
+    /* Minimize next box size */
+    .panel-right .panel-title {
+        display: none; /* Hide headers to save vertical space */
+    }
+    .next-container {
+        flex-direction: row !important;
+        justify-content: center;
+        gap: 8px;
+        height: 70px;
+    }
+    .next-queue {
+        flex-direction: row;
+        gap: 6px;
+        justify-content: center;
+        width: auto;
+    }
+    .main-next {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    .main-next canvas {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    .sub-next-row {
+        gap: 4px;
+    }
+    .sub-next {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    .sub-next canvas {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    /* Horizontal stat items */
+    .stats-container {
+        flex-direction: row !important;
+        justify-content: space-around;
+        align-items: center;
+        height: 70px;
+        padding: 5px !important;
+    }
+    .stat-item {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
+    .stat-label {
+        font-size: 0.7rem;
+    }
+    .stat-value {
+        font-size: 1.1rem;
+    }
+
+    /* Board sizing */
+    .board-container {
+        height: 100%;
+        max-height: 48vh; /* Scale board for mobile screens */
+    }
+    .board-wrapper {
+        border-width: 2px;
+    }
+
+    /* Enable mobile bottom pad */
+    .mobile-controls {
+        display: flex;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-container {
+        padding: 8px;
+    }
+    .logo {
+        font-size: 1.6rem;
+    }
+    .game-header {
+        margin-bottom: 8px;
+    }
+    .modal-content {
+        padding: 30px 15px;
+    }
+    .large {
+        font-size: 2.6rem;
+    }
+    .pad-btn {
+        height: 54px;
+    }
+    .action-btn {
+        height: 54px;
+    }
+}
+
+/* Touch-specific portrait optimizations for absolute fill */
+@media (max-height: 700px) and (max-width: 900px) {
+    .board-container {
+        max-height: 40vh;
+    }
+    .pad-btn, .action-btn {
+        height: 48px;
+        font-size: 1.2rem;
+    }
+    .secondary-ctrl {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+}

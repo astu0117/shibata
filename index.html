@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEON TETS - Ultra Modern Cyber Tetris</title>
+    <meta name="description" content="美しいネオングロー効果、本格的なホールド・ネクスト機能、シンセサイザーBGMを搭載した、極上のブラウザテトリスゲーム。">
+    <!-- Google Fonts: Share Tech Mono for retro-futuristic arcade stats, Outfit for modern UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-neon">
+    <!-- Background grid decoration -->
+    <div class="bg-grid-decor"></div>
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="game-header">
+            <h1 class="logo">NEON<span>TETS</span></h1>
+            <div class="header-controls">
+                <button id="theme-btn" class="icon-btn" title="テーマ変更">🎨 テーマ</button>
+                <button id="sound-btn" class="icon-btn" title="サウンド切り替え">🔊 ON</button>
+            </div>
+        </header>
+
+        <!-- Main Game Area -->
+        <main class="game-layout">
+            <!-- Left Sidebar: Hold / Info -->
+            <section class="side-panel panel-left">
+                <div class="glass-panel hold-container">
+                    <h2 class="panel-title">HOLD</h2>
+                    <div class="hold-box">
+                        <canvas id="hold-canvas" width="100" height="100"></canvas>
+                    </div>
+                </div>
+                
+                <div class="glass-panel controls-guide">
+                    <h3 class="panel-title">CONTROLS</h3>
+                    <ul class="guide-list">
+                        <li><span>← → / AD</span>移動</li>
+                        <li><span>↑ / W</span>回転 (右)</li>
+                        <li><span>Z / Q</span>回転 (左)</li>
+                        <li><span>↓ / S</span>ソフトドロップ</li>
+                        <li><span>Space</span>ハードドロップ</li>
+                        <li><span>C / Shift</span>ホールド</li>
+                        <li><span>P / Esc</span>ポーズ</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Center: Tetris Board -->
+            <section class="board-container">
+                <div class="board-wrapper">
+                    <!-- The Grid Canvas -->
+                    <canvas id="game-canvas" width="300" height="600"></canvas>
+                </div>
+            </section>
+
+            <!-- Right Sidebar: Next Queue / Stats -->
+            <section class="side-panel panel-right">
+                <div class="glass-panel next-container">
+                    <h2 class="panel-title">NEXT</h2>
+                    <div class="next-queue">
+                        <div class="next-box main-next">
+                            <canvas id="next-canvas-1" width="90" height="90"></canvas>
+                        </div>
+                        <div class="sub-next-row">
+                            <div class="next-box sub-next">
+                                <canvas id="next-canvas-2" width="60" height="60"></canvas>
+                            </div>
+                            <div class="next-box sub-next">
+                                <canvas id="next-canvas-3" width="60" height="60"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel stats-container">
+                    <div class="stat-item">
+                        <span class="stat-label">SCORE</span>
+                        <span id="score" class="stat-value font-arcade">000000</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">LEVEL</span>
+                        <span id="level" class="stat-value font-arcade">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">LINES</span>
+                        <span id="lines" class="stat-value font-arcade">0</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Mobile Touch Controls -->
+        <section class="mobile-controls">
+            <div class="mobile-row">
+                <button id="ctrl-hold" class="ctrl-btn secondary-ctrl">HOLD</button>
+                <button id="ctrl-hard" class="ctrl-btn secondary-ctrl">HARD DROP</button>
+            </div>
+            <div class="mobile-layout-grid">
+                <!-- Directional Pad (Left Side) -->
+                <div class="dpad-container">
+                    <button id="ctrl-left" class="ctrl-btn pad-btn pad-left">←</button>
+                    <button id="ctrl-down" class="ctrl-btn pad-btn pad-down">↓</button>
+                    <button id="ctrl-right" class="ctrl-btn pad-btn pad-right">→</button>
+                </div>
+                <!-- Action Buttons (Right Side) -->
+                <div class="actions-container">
+                    <button id="ctrl-rotate-ccw" class="ctrl-btn action-btn btn-ccw">↺</button>
+                    <button id="ctrl-rotate-cw" class="ctrl-btn action-btn btn-cw">↻</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer / Credits -->
+        <footer class="game-footer">
+            <p>&copy; 2026 NEON TETS. Developed by Antigravity.</p>
+        </footer>
+    </div>
+
+    <!-- Theme Selection Modal -->
+    <div id="theme-modal" class="modal">
+        <div class="modal-content glass-panel">
+            <h2 class="modal-title">THEME SELECT</h2>
+            <div class="theme-options">
+                <button class="theme-opt-btn active" data-theme="neon">
+                    <span class="theme-preview neon-color"></span>
+                    NEON CYBER
+                </button>
+                <button class="theme-opt-btn" data-theme="gameboy">
+                    <span class="theme-preview gameboy-color"></span>
+                    RETRO GAMEBOY
+                </button>
+                <button class="theme-opt-btn" data-theme="pastel">
+                    <span class="theme-preview pastel-color"></span>
+                    PASTEL DREAM
+                </button>
+                <button class="theme-opt-btn" data-theme="minimal">
+                    <span class="theme-preview minimal-color"></span>
+                    DARK MINIMAL
+                </button>
+            </div>
+            <button id="close-theme-btn" class="menu-btn primary-btn">決定</button>
+        </div>
+    </div>
+
+    <!-- Start Overlay Modal (Displays on load) -->
+    <div id="start-modal" class="modal active">
+        <div class="modal-content glass-panel pulse-border">
+            <h2 class="logo large">NEON<span>TETS</span></h2>
+            <p class="modal-desc">超美麗ネオン・テトリスへようこそ</p>
+            
+            <div class="high-scores-box">
+                <h3>🏆 LEADERBOARD</h3>
+                <ol id="high-scores-list">
+                    <li><span>1st</span><span class="font-arcade">--</span></li>
+                    <li><span>2nd</span><span class="font-arcade">--</span></li>
+                    <li><span>3rd</span><span class="font-arcade">--</span></li>
+                </ol>
+            </div>
+
+            <button id="start-btn" class="menu-btn primary-btn">GAME START</button>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="modal">
+        <div class="modal-content glass-panel error-border">
+            <h2 class="modal-title error-color">GAME OVER</h2>
+            <p class="score-summary">最終スコア: <span id="final-score" class="font-arcade error-glow">0</span></p>
+            
+            <div id="new-high-score-form" class="new-record-box hidden">
+                <p class="record-text">🎉 ニューレコード達成！ 名前を入力してください</p>
+                <div class="input-row">
+                    <input type="text" id="player-name-input" maxlength="8" placeholder="PLAYER" value="PLAYER">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button id="retry-btn" class="menu-btn primary-btn">RETRY</button>
+                <button id="quit-btn" class="menu-btn secondary-btn">START MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pause Modal -->
+    <div id="pause-modal" class="modal">
+        <div class="modal-content glass-panel">
+            <h2 class="modal-title">PAUSED</h2>
+            <p class="modal-desc">ゲームは一時停止されています</p>
+            <div class="modal-actions">
+                <button id="resume-btn" class="menu-btn primary-btn">RESUME</button>
+                <button id="restart-btn" class="menu-btn secondary-btn">RESTART</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sound initialization alert (toast-like) -->
+    <div id="sound-toast" class="toast">
+        🎵 サウンドが有効になりました（タップして再生）
+    </div>
+
+    <!-- Scripts -->
+    <script src="audio.js"></script>
+    <script src="tetris.js"></script>
+    <script src="ui.js"></script>
+</body>
+</html>

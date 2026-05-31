@@ -1,0 +1,19 @@
+{
+  "name": "tetris-game",
+  "version": "1.0.0",
+  "description": "Ultra Modern Cyber Tetris",
+  "main": "tetris.js",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "build": "echo 'No build step required for this static project.'",
+    "test": "echo 'No tests defined.' && exit 0"
+  },
+  "keywords": [
+    "tetris",
+    "neon",
+    "game"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "module"
+}
