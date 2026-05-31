@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank AI Pro - Workstation</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --accent: #58a6ff;
+            --success: #3fb950;
+            --danger: #f85149;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; font-size: 14px; }
+        .grid { display: grid; grid-template-columns: 350px 1fr 350px; gap: 15px; max-width: 1600px; margin: 0 auto; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; }
+        .span-2 { grid-column: span 2; }
+        .span-3 { grid-column: span 3; }
+        h1 { font-size: 1.2rem; margin: 0 0 20px 0; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        h2 { font-size: 0.8rem; text-transform: uppercase; color: #8b949e; margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px; }
+        
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 11px; color: #8b949e; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 8px; background: #0d1117; border: 1px solid var(--border); border-radius: 6px; color: white; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: var(--accent); }
+        
+        .btn { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary { background: #238636; color: white; border: none; }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-outline { background: transparent; color: var(--text); }
+        .btn-outline:hover { background: #21262d; border-color: #8b949e; }
+        .btn-danger { color: var(--danger); }
+        .btn-danger:hover { background: #b62324; color: white; border: none; }
+        
+        #networkCanvas { width: 100%; height: 400px; background: #0d1117; border-radius: 6px; cursor: crosshair; }
+        .result-panel { margin-top: 15px; padding: 15px; background: #1f6feb1a; border-radius: 6px; text-align: center; border: 1px solid #1f6feb33; }
+        .bank-label { font-size: 1.4rem; font-weight: 800; color: var(--accent); display: block; }
+        
+        .toolbar { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tag { padding: 2px 8px; border-radius: 12px; font-size: 10px; background: #21262d; border: 1px solid var(--border); }
+        
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; flex-direction: column; gap: 15px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <span>学習中...知識をアップデートしています</span>
+    </div>
+
+    <h1><i class="ri-pulse-line"></i> Bank AI Professional Workstation v2.0</h1>
+
+    <div class="grid">
+        <!-- Control Panel -->
+        <div class="card">
+            <h2><i class="ri-settings-3-line"></i> モデル制御 / 推論</h2>
+            <div class="input-group">
+                <label>支店番号</label>
+                <input type="number" id="p1" value="560">
+            </div>
+            <div class="input-group">
+                <label>口座番号</label>
+                <input type="number" id="p2" value="2278648">
+            </div>
+            <button class="btn btn-primary" onclick="predict()">
+                <i class="ri-play-fill"></i> 予測を実行
+            </button>
+            
+            <div class="result-panel">
+                <span id="resBank" class="bank-label">READY</span>
+                <span id="resConf" style="color:var(--success); font-weight:bold;">CONFIDENCE: --%</span>
+            </div>
+
+            <hr style="border:0; border-top:1px solid var(--border); margin: 20px 0;">
+            
+            <h2><i class="ri-database-2-line"></i> データセット管理</h2>
+            <div class="input-group">
+                <label>ターゲット銀行</label>
+                <select id="lName">
+                    <option value="mizuho">みずほ銀行</option>
+                    <option value="saitamarisona">埼玉りそな銀行</option>
+                    <option value="mitsuisumitomo">三井住友銀行</option>
+                    <option value="sonybank">ソニー銀行</option>
+                </select>
+            </div>
+            <button class="btn btn-outline" onclick="learn()">
+                <i class="ri-add-line"></i> 学習データに追加
+            </button>
+            <div id="stats" class="tag" style="margin-top:10px; display:inline-block;">Samples: -</div>
+        </div>
+
+        <!-- Brain Explorer -->
+        <div class="card span-2">
+            <div class="toolbar">
+                <h2><i class="ri-bubble-chart-line"></i> 脳内構造エクスプローラー</h2>
+                <div style="flex-grow: 1;"></div>
+                <button class="tag btn-outline" onclick="refreshInfo()"><i class="ri-refresh-line"></i> 同期</button>
+                <button class="tag btn-danger" onclick="resetModel()"><i class="ri-restart-line"></i> モデル初期化</button>
+            </div>
+            <canvas id="networkCanvas"></canvas>
+            <div style="margin-top:10px; font-size:10px; color:#8b949e;">
+                <span style="color:#38bdf8">■</span> 正の相関 (Excitatory) &nbsp; 
+                <span style="color:#f472b6">■</span> 負の相関 (Inhibitory) &nbsp; 
+                ※線の太さは結合強度（Weights）を示します
+            </div>
+        </div>
+
+        <!-- Metrics Section -->
+        <div class="card">
+            <h2><i class="ri-bar-chart-box-line"></i> 推論確率分布</h2>
+            <canvas id="confChart"></canvas>
+        </div>
+
+        <div class="card span-2">
+            <h2><i class="ri-line-chart-line"></i> 学習損失推移 (Convergence Matrix)</h2>
+            <canvas id="lossChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let lossChart, confChart, nnData;
+        const banks = ["mizuho", "saitamarisona", "mitsuisumitomo", "sonybank"];
+
+        async function init() {
+            initCharts();
+            await refreshInfo();
+            window.addEventListener('resize', drawNetwork);
+        }
+
+        function initCharts() {
+            const chartOptions = {
+                plugins: { legend: { display: false } },
+                scales: { 
+                    y: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
+                    x: { grid: { display: false }, ticks: { color: '#8b949e' } }
+                }
+            };
+            
+            lossChart = new Chart(document.getElementById('lossChart'), {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'Loss', data: [], borderColor: '#58a6ff', tension: 0.4, fill: true, backgroundColor: '#58a6ff1a' }] },
+                options: chartOptions
+            });
+
+            confChart = new Chart(document.getElementById('confChart'), {
+                type: 'bar',
+                data: { labels: banks.map(b => b.toUpperCase()), datasets: [{ data: [0,0,0,0], backgroundColor: ['#58a6ff', '#3fb950', '#d29922', '#f85149'] }] },
+                options: { ...chartOptions, indexAxis: 'y', scales: { x: { max: 100, grid: { color: '#30363d' } } } }
+            });
+        }
+
+        async function refreshInfo() {
+            const res = await fetch('/api/info');
+            nnData = await res.json();
+            document.getElementById('stats').innerText = `Dataset Size: ${nnData.datasetSize}`;
+            if (nnData.lossHistory) {
+                lossChart.data.labels = nnData.lossHistory.map(h => h.epoch);
+                lossChart.data.datasets[0].data = nnData.lossHistory.map(h => h.loss);
+                lossChart.update();
+            }
+            drawNetwork();
+        }
+
+        function drawNetwork() {
+            const canvas = document.getElementById('networkCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            const layers = nnData.layers;
+            const weights = nnData.weights;
+            const nodeRadius = 6;
+            const layerSpacing = canvas.width / (layers.length + 1);
+
+            const nodes = layers.map((count, lIdx) => {
+                const x = layerSpacing * (lIdx + 1);
+                const vSpacing = canvas.height / (count + 1);
+                return Array.from({ length: count }, (_, i) => ({ x, y: vSpacing * (i + 1) }));
+            });
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Connections
+            weights.forEach((wMatrix, lIdx) => {
+                const fromNodes = nodes[lIdx];
+                const toNodes = nodes[lIdx + 1];
+                wMatrix.data.forEach((row, i) => {
+                    row.forEach((weight, j) => {
+                        if (Math.abs(weight) < 0.1) return; // Only draw significant weights
+                        ctx.beginPath();
+                        ctx.moveTo(fromNodes[j].x, fromNodes[j].y);
+                        ctx.lineTo(toNodes[i].x, toNodes[i].y);
+                        ctx.lineWidth = Math.abs(weight) * 2;
+                        ctx.strokeStyle = weight > 0 ? `rgba(88, 166, 255, ${Math.abs(weight) * 0.6})` : `rgba(248, 81, 73, ${Math.abs(weight) * 0.6})`;
+                        ctx.stroke();
+                    });
+                });
+            });
+
+            // Nodes
+            nodes.forEach(col => {
+                col.forEach(node => {
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, nodeRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = "#0d1117";
+                    ctx.fill();
+                    ctx.strokeStyle = "#8b949e";
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                });
+            });
+        }
+
+        async function predict() {
+            const numbers = [document.getElementById('p1').value, document.getElementById('p2').value, 0].map(Number);
+            const res = await fetch('/api/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numbers })
+            });
+            const data = await res.json();
+            document.getElementById('resBank').innerText = data.predicted_bank.toUpperCase();
+            document.getElementById('resConf').innerText = `CONFIDENCE: ${data.confidence}`;
+            confChart.data.datasets[0].data = data.prediction.map(v => v * 100);
+            confChart.update();
+        }
+
+        async function learn() {
+            const name = document.getElementById('lName').value;
+            const numbers = [document.getElementById('p1').value, document.getElementById('p2').value, 0].map(Number);
+            
+            document.getElementById('loading').style.display = 'flex';
+            try {
+                const res = await fetch('/api/learn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, numbers })
+                });
+                const data = await res.json();
+                if (data.success) await refreshInfo();
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        async function resetModel() {
+            if (!confirm('モデルを初期化し、学習をリセットしますか？')) return;
+            await fetch('/api/reset', { method: 'POST' });
+            await refreshInfo();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

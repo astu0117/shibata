@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "Ultra Modern Cyber Tetris",
   "main": "tetris.js",
+  "type": "module",
   "scripts": {
     "start": "python -m http.server 8000",
     "build": "echo 'No build step required for this static project.'",
-    "test": "echo 'No tests defined.' && exit 0"
+    "test": "echo 'No tests defined.' && exit 0",
+    "node-start": "node index.js",
+    "node-test": "node --test test/*.test.js"
   },
   "keywords": [
     "tetris",
@@ -15,5 +18,18 @@
   ],
   "author": "",
   "license": "ISC",
-  "type": "module"
+  "dependencies": {
+    "axios": "^1.15.2",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/astu0117/shibata.git"
+  },
+  "bugs": {
+    "url": "https://github.com/astu0117/shibata/issues"
+  },
+  "homepage": "https://github.com/astu0117/shibata#readme"
 }
