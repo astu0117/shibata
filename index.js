@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const { DNN } = require('./dnn');
+const { getTorServers } = require('./torServers');
 const path = require('path');
 const fs = require('fs');
 const app = express();
@@ -114,6 +115,30 @@ app.get('/api/rag', (req, res) => {
     item.category.toLowerCase().includes(query)
   );
   res.json(filtered);
+});
+
+app.get('/api/tor/servers', async (req, res) => {
+  const { sortBy, order, limit } = req.query;
+  const data = await getTorServers({ sortBy, order, limit });
+  res.json({
+    name: 'Tor relay server data',
+    sortedBy: sortBy || 'observed_bandwidth',
+    order: order === 'asc' ? 'asc' : 'desc',
+    numbered: true,
+    ...data,
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.post('/api/tor/train', async (req, res) => {
+  const data = await getTorServers({ limit: 25, sortBy: 'observed_bandwidth', order: 'desc' });
+  res.json({
+    success: true,
+    message: 'Tor relay DNN is initialized from relay features and sample labels.',
+    labels: ['relay', 'exit', 'guard', 'directory'],
+    sampleCount: data.total,
+    preview: data.servers.slice(0, 5)
+  });
 });
 
 app.post('/api/predict', (req, res) => {
