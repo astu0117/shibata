@@ -78,3 +78,6 @@ output.txt
 .matplotlib/
 GEMINI.md
 MEMORY.md
+
+# Antigravity IDE config
+.antigravity-ide/extensions/
