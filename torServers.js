@@ -1,16 +1,16 @@
-const axios = require('axios');
-const { DNN } = require('./dnn');
+import axios from 'axios';
+import { DNN } from './dnn.js';
 
 const TOR_DETAILS_URL = 'https://onionoo.torproject.org/details?running=true&type=relay';
 
-const sampleRelays = [
+export const sampleRelays = [
   { nickname: 'AlphaRelay', fingerprint: 'A'.repeat(40), country: 'de', flags: ['Fast', 'Guard', 'Running', 'Stable'], observed_bandwidth: 12000000, advertised_bandwidth: 15000000, last_restarted: '2026-05-20 00:00:00' },
   { nickname: 'ExitNodeOne', fingerprint: 'B'.repeat(40), country: 'nl', flags: ['Exit', 'Fast', 'Running', 'Valid'], observed_bandwidth: 25000000, advertised_bandwidth: 30000000, last_restarted: '2026-05-15 00:00:00' },
   { nickname: 'DirectoryHub', fingerprint: 'C'.repeat(40), country: 'us', flags: ['Authority', 'Fast', 'Running', 'V2Dir'], observed_bandwidth: 18000000, advertised_bandwidth: 22000000, last_restarted: '2026-05-01 00:00:00' },
   { nickname: 'MiddleRelay', fingerprint: 'D'.repeat(40), country: 'jp', flags: ['Fast', 'Running', 'Stable'], observed_bandwidth: 9000000, advertised_bandwidth: 11000000, last_restarted: '2026-05-25 00:00:00' }
 ];
 
-function getPrimaryClass(flags = []) {
+export function getPrimaryClass(flags = []) {
   if (flags.includes('Exit')) return 'exit';
   if (flags.includes('Guard')) return 'guard';
   if (flags.includes('Authority') || flags.includes('V2Dir')) return 'directory';
@@ -24,7 +24,7 @@ function uptimeDays(lastRestarted) {
   return Math.max(0, (Date.now() - restarted.getTime()) / 86400000);
 }
 
-function normalizeRelay(relay) {
+export function normalizeRelay(relay) {
   const observed = Number(relay.observed_bandwidth || 0);
   const advertised = Number(relay.advertised_bandwidth || 0);
   const days = uptimeDays(relay.last_restarted);
@@ -40,7 +40,7 @@ function normalizeRelay(relay) {
   ];
 }
 
-function sortRelays(relays, sortBy = 'observed_bandwidth', order = 'desc') {
+export function sortRelays(relays, sortBy = 'observed_bandwidth', order = 'desc') {
   const direction = order === 'asc' ? 1 : -1;
   return [...relays].sort((a, b) => {
     const left = a[sortBy] || 0;
@@ -85,7 +85,7 @@ function scoreRelay(relay) {
   };
 }
 
-function buildServerData(relays, options = {}) {
+export function buildServerData(relays, options = {}) {
   const sortBy = options.sortBy || 'observed_bandwidth';
   const order = options.order || 'desc';
   const limit = Math.max(1, Math.min(Number(options.limit || 25), 100));
@@ -111,7 +111,7 @@ async function fetchTorRelays() {
   return Array.isArray(response.data.relays) ? response.data.relays : [];
 }
 
-async function getTorServers(options = {}) {
+export async function getTorServers(options = {}) {
   try {
     const relays = await fetchTorRelays();
     return {
@@ -130,12 +130,3 @@ async function getTorServers(options = {}) {
     };
   }
 }
-
-module.exports = {
-  buildServerData,
-  getPrimaryClass,
-  getTorServers,
-  normalizeRelay,
-  sampleRelays,
-  sortRelays
-};

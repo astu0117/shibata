@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 class Matrix {
   constructor(rows, cols) {
@@ -124,7 +124,7 @@ const softmax = (arr) => {
   return exp.map(v => sum === 0 ? 1/arr.length : v / sum);
 };
 
-class DNN {
+export class DNN {
   constructor(layers, lr = 0.01, momentum = 0.5) {
     this.layers = layers;
     this.lr = lr;
@@ -241,5 +241,3 @@ class DNN {
     return this.weights.map(w => w.serialize());
   }
 }
-
-module.exports = { DNN };

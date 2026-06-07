@@ -1,6 +1,6 @@
-const assert = require('node:assert/strict');
-const test = require('node:test');
-const { DNN } = require('../dnn');
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { DNN } from '../dnn.js';
 
 test('feedForward returns one probability per output node', () => {
   const nn = new DNN([3, 4, 2]);

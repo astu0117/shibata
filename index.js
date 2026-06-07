@@ -1,9 +1,13 @@
-require('dotenv').config();
-const express = require('express');
-const { DNN } = require('./dnn');
-const { getTorServers } = require('./torServers');
-const path = require('path');
-const fs = require('fs');
+import 'dotenv/config';
+import express from 'express';
+import { DNN } from './dnn.js';
+import { getTorServers } from './torServers.js';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3000;
 
